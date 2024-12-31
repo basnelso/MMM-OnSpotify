@@ -59,10 +59,9 @@ module.exports = NodeHelper.create({
         if (this.isCorrectIdOrRefresh(payload))
           this.fetchSpotifyData("AFFINITY");
         break;
-
-      /* WIP | Non implemented */
       case "REFRESH_QUEUE":
-        this.fetchSpotifyData("QUEUE");
+        if (this.isCorrectIdOrRefresh(payload))
+          this.fetchSpotifyData("QUEUE");
         break;
       case "REFRESH_RECENT":
         this.fetchSpotifyData("RECENT");
@@ -280,6 +279,7 @@ module.exports = NodeHelper.create({
 
         // Future update
         case "QUEUE":
+          this.sendSocketNotification("QUEUE_DATA", data);
           break;
       }
     } catch (error) {

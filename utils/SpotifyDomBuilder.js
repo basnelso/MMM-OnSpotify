@@ -14,6 +14,7 @@ class SpotifyDomBuilder {
     this.translate = translator;
     this.notifyModules = externalNotifier;
     this.root = document.querySelector(":root");
+    this.queueData = null;
     this.firstUpdate = true;
     this.lastItemURI = null;
     this.lastUrlProcessed = null;
@@ -226,6 +227,7 @@ class SpotifyDomBuilder {
 
     if (this.config.theming.showBlurBackground)
       content.appendChild(this.getPlayerBackground(data));
+    
     content.appendChild(this.getPlayerData(data));
 
     wrapper.appendChild(content);
@@ -376,6 +378,11 @@ class SpotifyDomBuilder {
       data.playerMediaType ? data.playerMediaType : "unknown",
     );
 
+    /* Queue */
+    const queueContainer = document.createElement("div");
+    queueContainer.classList.add("queue");
+    queueContainer.id = "VSNO-TARGET-QUEUE";
+
     /* Header -> Title | Subtitle */
     const header = document.createElement("div");
     header.classList.add("header");
@@ -398,6 +405,7 @@ class SpotifyDomBuilder {
 
     names.appendChild(title);
     names.appendChild(subtitle);
+
     this.config.theming.showVerticalPipe ? header.appendChild(visual) : null;
     header.appendChild(names);
 
@@ -472,6 +480,7 @@ class SpotifyDomBuilder {
     if (this.config.theming.scrollAnimations) this.setScrollAnimation(true);
 
     /* Main */
+    player.appendChild(queueContainer);
     player.appendChild(header);
     player.appendChild(swappable);
     if (this.config.theming.spotifyCodeExperimentalShow) {
@@ -481,6 +490,7 @@ class SpotifyDomBuilder {
     player.appendChild(footer);
     return player;
   }
+  
   getPlayerBackground() {
     const bg = document.createElement("div");
     bg.classList.add(
@@ -510,7 +520,42 @@ class SpotifyDomBuilder {
   }
 
   updatePlayerData(data) {
+    console.log("updating player data")
     if (!document.getElementById("ONSP-WRAPPER")) return;
+
+    // Update queue
+    const queueContainer = document.getElementById("VSNO-TARGET-QUEUE");
+    queueContainer.innerHTML = "";
+
+    [...this.queueData].reverse().forEach((track, index) => {
+        const trackHeader = document.createElement("div");
+        trackHeader.classList.add("queue-header");
+
+        const names = document.createElement("div");
+        names.classList.add("names");
+
+        const visual = document.createElement("span");
+        visual.classList.add("visual");
+
+        const title = document.createElement("span");
+        title.classList.add("title");
+        title.innerText = track.name;
+
+        const subtitle = document.createElement("span");
+        subtitle.classList.add("subtitle");
+        subtitle.innerText = track.artists[0].name;
+
+        names.appendChild(title);
+        names.appendChild(subtitle);
+
+        this.config.theming.showVerticalPipe ? trackHeader.appendChild(visual) : null;
+        trackHeader.appendChild(names);
+
+        queueContainer.appendChild(trackHeader);
+    });
+
+    // Update player
+
     if (
       data &&
       (data.statusIsNewSong || this.firstUpdate) &&
@@ -618,6 +663,11 @@ class SpotifyDomBuilder {
     container.appendChild(cover);
   }
 
+  updateQueueData(data) {
+    console.log("queue data:")
+    console.log(data)
+    this.queueData = data;
+  }
 
   /* AFFINITY */
   getAffinityGrid(data) {

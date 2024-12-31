@@ -32,6 +32,7 @@ Module.register("MMM-OnSpotify", {
     // state, as user data does not change that much, this prevents unnecessary api calls.
     userDataMaxAge: 14400,
     userAffinityMaxAge: 36000,
+    queueDataMaxAge: 1,
     // Filter which devices show up in the module
     deviceFilter: [],
     deviceFilterExclude: false,
@@ -51,6 +52,8 @@ Module.register("MMM-OnSpotify", {
       // If the errors persist, use a wider window between calls.
       onError: 8,
     },
+
+    queueLimit: 5,
 
     theming: {
       // As RPIs are not powerful you can disable some of the animations.
@@ -144,6 +147,8 @@ Module.register("MMM-OnSpotify", {
     // Send a notification with the color data when only when the song changes, this is useful for modules
     // that are not going to show the color inside the dom.
     experimentalColorSignaling: false,
+
+    displayQueue: false,
   },
 
   start: function () {
@@ -165,6 +170,7 @@ Module.register("MMM-OnSpotify", {
     this.lastStatus = "isPlaying";
     this.muduleHidden = false;
     this.firstSongOnLoad = true;
+    this.requestQueueData = false;
     this.usesCssOverrides =
       typeof this.config.theming.experimentalCSSOverridesForMM2 === "object";
 
@@ -217,7 +223,7 @@ Module.register("MMM-OnSpotify", {
     this.playerData = null;
     this.affinityData = null;
     this.canvasData = null;
-    // this.queueData = null;
+    this.queueData = null;
     // this.recentData = null;
 
     this.root = document.querySelector(":root");
@@ -235,6 +241,7 @@ Module.register("MMM-OnSpotify", {
   },
 
   getDom: function () {
+    console.log("getting dom")
     if (this.playerData && this.playerData.deviceIsPrivate) {
       this.nowDisplaying = "private";
       return this.builder.privateSession(this.playerData);
@@ -432,6 +439,12 @@ Module.register("MMM-OnSpotify", {
         this.requestAffinityData = false;
         this.smartUpdate("AFFINITY_DATA");
         break;
+      case "QUEUE_DATA":
+        this.queueData = payload;
+        this.queueData.age = Date.now();
+        this.requestQueueData = false;
+        this.smartUpdate("QUEUE_DATA");
+        break;
       case "CONNECTION_ERRONED":
         if (this.isConnectedToSpotify) {
           console.info(
@@ -566,6 +579,8 @@ Module.register("MMM-OnSpotify", {
       this.sendSocketNotification("REFRESH_USER", this.backendExpectId);
     if (this.requestAffinityData)
       this.sendSocketNotification("REFRESH_AFFINITY", this.backendExpectId);
+    if (this.requestQueueData)
+      this.sendSocketNotification("REFRESH_QUEUE", this.backendExpectId)
   },
 
   smartUpdate: function (type) {
@@ -593,6 +608,12 @@ Module.register("MMM-OnSpotify", {
           : false))
         ? true
         : false;
+
+    this.requestQueueData = 
+      this.config.displayQueue &&
+      this.isConnectedToSpotify &&
+      (!this.queueData || 
+        (Date.now() > this.queueData.age + this.config.queueDataMaxAge * 1000));
 
     this.currentStatus = this.isConnectedToSpotify
       ? this.playerData
@@ -680,6 +701,7 @@ Module.register("MMM-OnSpotify", {
 
     if (type === "CANVAS_DATA") this.builder.updateCanvas(this.canvasData);
     if (type === "USER_DATA") this.builder.updateUserData(this.userData);
+    if (type === "QUEUE_DATA") this.builder.updateQueueData(this.queueData.queue.slice(0, this.config.queueLimit));
     if (type === "AFFINITY_DATA")
       this.builder.updateAffinityData(this.affinityData);
   },
