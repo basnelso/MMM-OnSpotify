@@ -228,6 +228,14 @@ class SpotifyDomBuilder {
     if (this.config.theming.showBlurBackground)
       content.appendChild(this.getPlayerBackground(data));
     
+    /* Queue */
+    if (this.config.displayQueue) {
+      const queueContainer = document.createElement("div");
+      queueContainer.classList.add("queue");
+      queueContainer.id = "VSNO-TARGET-QUEUE";
+      wrapper.appendChild(queueContainer);
+    }
+
     content.appendChild(this.getPlayerData(data));
 
     wrapper.appendChild(content);
@@ -378,11 +386,6 @@ class SpotifyDomBuilder {
       data.playerMediaType ? data.playerMediaType : "unknown",
     );
 
-    /* Queue */
-    const queueContainer = document.createElement("div");
-    queueContainer.classList.add("queue");
-    queueContainer.id = "VSNO-TARGET-QUEUE";
-
     /* Header -> Title | Subtitle */
     const header = document.createElement("div");
     header.classList.add("header");
@@ -480,7 +483,6 @@ class SpotifyDomBuilder {
     if (this.config.theming.scrollAnimations) this.setScrollAnimation(true);
 
     /* Main */
-    player.appendChild(queueContainer);
     player.appendChild(header);
     player.appendChild(swappable);
     if (this.config.theming.spotifyCodeExperimentalShow) {

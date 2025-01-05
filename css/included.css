@@ -565,19 +565,19 @@
     animation-timing-function: cubic-bezier(0.42, 0, 0.93, 0.98);
 }
 /* Queue styling */
-.ONSP-Base .player .queue-header {
+.ONSP-Base .queue-header {
     display: flex;
     flex-flow: row nowrap;
     align-items: stretch;
     gap: 0.5em;
     padding-bottom: 0.04em;
 }
-.ONSP-Base .player .queue-header .visual {
+.ONSP-Base .queue-header .visual {
     background-color: grey;
     width: 0.08em;
     border-radius: 1em;
 }
-.ONSP-Base .player .queue-header .names {
+.ONSP-Base .queue-header .names {
     display: flex;
     flex-flow: column nowrap;
     overflow: hidden;
@@ -586,24 +586,30 @@
     flex: 1;
     align-items: flex-start;
 }
-.ONSP-Base .player .queue-header .names .title {
+.ONSP-Base .queue-header .names .title {
     display: flex;
     align-items: center;
-    font-size: 1.25em;
+    font-size: 1em;
     font-weight: bold;
     color: grey;
     margin-bottom: -0.16em;
     margin-top: -0.1em;
 }
-.ONSP-Base .player .queue-header .names .subtitle {
+.ONSP-Base .queue-header .names .subtitle {
     display: flex;
     align-items: center;
-    font-size: 0.9em;
+    font-size: 0.7em;
     padding-left: 0.04em;
     color: grey;
     font-weight: 100;
     margin-top: -0.16em;
     margin-bottom: -0.1em;
+}
+.queue-header {
+    margin-bottom: 0.3em;
+}
+.queue {
+    padding-bottom: 0.75em;
 }
 
 
